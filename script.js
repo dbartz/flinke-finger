@@ -347,19 +347,19 @@ function finishLesson() {
   const wpm = Math.round(words / Math.max(timeSpentMinutes, 0.001)); 
   
   // Star Calculation
-  // Speed 100wpm = 100%
+  // Speed 50wpm = 100%
   // Average = (Speed% + Accuracy%) / 2
   // 1 star: Avg >= 50%
   // 2 stars: Avg >= 75%
-  // 3 stars: Accuracy == 100% AND Speed >= 100wpm
+  // 3 stars: Accuracy == 100% AND Speed >= 50wpm
   
-  const speedPercent = (wpm / 100) * 100;
+  const speedPercent = Math.round((wpm / 50) * 100);
   const average = (speedPercent + accuracy) / 2;
   
   let stars = 0;
   if (average >= 50) stars = 1;
   if (average >= 75) stars = 2;
-  if (accuracy === 100 && wpm >= 100) stars = 3;
+  if (accuracy === 100 && wpm >= 50) stars = 3;
   
   // Minimum 1 star if completed (optional, adhering to "One star: average 50%")
   // But usually 0 stars is valid. I'll stick to 0 if they do poorly.
@@ -367,10 +367,10 @@ function finishLesson() {
   saveProgress(currentLesson.id, stars);
   playWin();
   
-  showResult(stars, accuracy, wpm);
+  showResult(stars, accuracy, wpm, speedPercent);
 }
 
-function showResult(stars, accuracy, wpm) {
+function showResult(stars, accuracy, wpm, speedPercent) {
   const newLevel = calculatePlayerLevel();
   const newTitle = getTitleForLevel(newLevel);
   const leveledUp = newLevel > previousLevel;
@@ -388,7 +388,7 @@ function showResult(stars, accuracy, wpm) {
   
   // Stats
   document.getElementById('result-accuracy').textContent = `Genauigkeit: ${accuracy}%`;
-  document.getElementById('result-wpm').textContent = `Geschwindigkeit: ${wpm} WPM`;
+  document.getElementById('result-wpm').textContent = `Geschwindigkeit: ${wpm} WPM (${speedPercent}%)`;
   
   // Level up message
   const levelUpEl = document.getElementById('level-up-message');
