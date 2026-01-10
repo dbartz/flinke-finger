@@ -61,6 +61,7 @@
 
 ## 4. Deployment
 - **Compatibility**: GitHub Pages (Client-side only).
+- **Documentation**: Add README with features and live demo link.
 
 ## 5. Out of Scope
 - **Mobile/Tablet Support**: The trainer is designed for physical keyboards (desktop/laptop) to teach proper touch typing. Virtual keyboards and touch devices are not supported.
