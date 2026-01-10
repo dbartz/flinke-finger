@@ -123,11 +123,13 @@ let currentTextIndex = 0;
 let currentCharIndex = 0;
 let currentText = '';
 let charStatus = []; // 'correct' or 'incorrect'
-let errors = 0;
-let startTime = null;
+// Session stats (cumulative across all texts in lesson)
+let totalLessonErrors = 0;
+let totalLessonChars = 0;
+let lessonStartTime = null;
+let totalPausedTime = 0;
 let isPaused = false;
 let pauseStartTime = null;
-let totalPausedTime = 0;
 let streak = 0;
 let previousLevel = 1;
 
@@ -206,6 +208,12 @@ function initGame() {
   // Update header title
   document.getElementById('lesson-title').textContent = currentLesson.name;
 
+  // Initialize session stats
+  totalLessonErrors = 0;
+  totalLessonChars = 0;
+  lessonStartTime = Date.now();
+  totalPausedTime = 0;
+
   startNewText();
   
   // Focus game
@@ -245,11 +253,13 @@ function startNewText() {
   currentText = currentLesson.texts[currentTextIndex];
   currentCharIndex = 0;
   charStatus = new Array(currentText.length).fill(null);
-  errors = 0;
-  startTime = Date.now();
-  totalPausedTime = 0;
+  // errors = 0; // Removed: collecting global errors now
+  // startTime = Date.now(); // Removed: using lessonStartTime
   isPaused = false;
   streak = 0;
+  
+  // Accumulate total chars (texts can vary in length)
+  totalLessonChars += currentText.length;
   
   document.getElementById('lesson-progress').textContent = `Text ${currentTextIndex + 1}/${currentLesson.texts.length}`;
   renderText();
@@ -307,7 +317,7 @@ function handleKeyPress(e) {
   } else if (e.key.length === 1) { 
     playError();
     charStatus[currentCharIndex] = 'incorrect';
-    errors++;
+    totalLessonErrors++;
     currentCharIndex++; // Advance even on error
     streak = 0;
     updateStreak();
@@ -348,16 +358,13 @@ function handleTextComplete() {
 
 function finishLesson() {
   const endTime = Date.now();
-  const timeSpentMinutes = (endTime - startTime - totalPausedTime) / 1000 / 60;
+  const timeSpentMinutes = (endTime - lessonStartTime - totalPausedTime) / 1000 / 60;
   
-  // Calculate based on the last text segment (consistent with original logic, simpler)
-  const textLength = currentText.length;
-  
-  // Accuracy
-  const accuracy = Math.max(0, Math.round(((textLength - errors) / textLength) * 100));
+  // Calculate based on cumulative stats
+  const accuracy = Math.max(0, Math.round(((totalLessonChars - totalLessonErrors) / totalLessonChars) * 100));
   
   // WPM
-  const words = textLength / 5;
+  const words = totalLessonChars / 5;
   const wpm = Math.round(words / Math.max(timeSpentMinutes, 0.001)); 
   
   // Star Calculation
