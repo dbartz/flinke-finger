@@ -141,15 +141,41 @@ body::after {
 .menu-header p {
   font-size: 1.1rem;
   color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  text-align: left;
+}
+
+.header-content {
+  flex: 1;
+  max-width: 600px;
+}
+
+.robot-mascot {
+  height: 250px; /* Large robot */
+  width: auto;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
+  animation: float 4s ease-in-out infinite;
+  object-fit: contain;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .player-info {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 1.5rem;
   flex-wrap: wrap;
-  margin: 2rem 0;
+  margin-bottom: 2rem; /* Spacing before progress bar */
   background: rgba(15, 23, 42, 0.3);
   padding: 1rem 2rem;
   border-radius: 100px;
@@ -186,11 +212,10 @@ body::after {
 
 .progress-bar {
   width: 100%;
-  max-width: 450px;
+  max-width: 100%; /* Fill the container */
   height: 8px;
   background: rgba(255,255,255,0.05);
   border-radius: 10px;
-  margin: 0 auto;
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
@@ -597,6 +622,16 @@ body::after {
 
 /* Responsive */
 @media (max-width: 650px) {
+  .header-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .player-info {
+    justify-content: center;
+  }
+  
   .menu-header {
     padding: 2rem 1rem;
   }
