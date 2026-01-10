@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flinke Finger - Deutscher Tipp-Trainer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <!-- Game View -->
+  <div id="game-view" class="view active" tabindex="0">
+
+    <div class="game-header">
+      <div>
+        <h2 id="lesson-title">Lektion</h2>
+        <span id="lesson-progress">Text 1/5</span>
+      </div>
+      <div class="game-controls">
+        <button id="pause-btn">⏸ Pause</button>
+        <button id="back-btn">← Menü</button>
+      </div>
+    </div>
+    
+    <div id="text-display">
+      <!-- Current text will be rendered here -->
+    </div>
+    
+    <p class="typing-hint">Tippe den Text ab. Drücke die richtige Taste!</p>
+    
+    <!-- Pause Overlay -->
+    <div id="pause-overlay" class="hidden">
+      <div class="pause-content">
+        <h2>⏸️ Pausiert</h2>
+        <p>Klicke irgendwo oder drücke "Weiter" um fortzufahren</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Result Overlay -->
+  <div id="result-overlay" class="hidden">
+    <div class="result-content">
+      <h2>🎉 Lektion abgeschlossen!</h2>
+      
+      <div id="result-stars">
+        <!-- Stars will be rendered here -->
+      </div>
+      
+      <div class="result-stats">
+        <p id="result-accuracy">Genauigkeit: 100%</p>
+        <p id="result-wpm">Geschwindigkeit: 30 WPM</p>
+      </div>
+      
+      <p id="level-up-message" class="hidden"></p>
+      <p id="new-title-message" class="hidden"></p>
+      
+      <div class="result-buttons">
+        <button id="retry-btn">🔄 Nochmal</button>
+        <button id="next-btn">➡️ Weiter</button>
+        <button id="menu-btn">🏠 Menü</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

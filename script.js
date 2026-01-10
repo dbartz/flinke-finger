@@ -46,12 +46,7 @@ function getTitleForLevel(level) {
 }
 
 // ============== Audio ==============
-let clickSound = null;
-let errorSound = null;
-let winSound = null;
-
 function initAudio() {
-  // Create audio elements using Web Audio API oscillator for click sounds
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext) {
     window.audioCtx = new AudioContext();
@@ -88,7 +83,7 @@ function playError() {
 
 function playWin() {
   if (!window.audioCtx) return;
-  const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+  const notes = [523, 659, 784, 1047];
   notes.forEach((freq, i) => {
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -106,7 +101,7 @@ function playWin() {
 
 function playLevelUp() {
   if (!window.audioCtx) return;
-  const notes = [392, 494, 587, 784, 988, 1175]; // G4, B4, D5, G5, B5, D6
+  const notes = [392, 494, 587, 784, 988, 1175];
   notes.forEach((freq, i) => {
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -128,7 +123,6 @@ let currentTextIndex = 0;
 let currentCharIndex = 0;
 let currentText = '';
 let errors = 0;
-let totalChars = 0;
 let startTime = null;
 let isPaused = false;
 let pauseStartTime = null;
@@ -136,30 +130,244 @@ let totalPausedTime = 0;
 let streak = 0;
 let previousLevel = 1;
 
-// ============== View Management ==============
-function showView(viewId) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(viewId).classList.add('active');
-}
-
-function showMenu() {
+// ============== Menu Logic (index.html) ==============
+function initMenu() {
   renderMenu();
-  showView('menu-view');
+  
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Wirklich allen Fortschritt löschen? Das kann nicht rückgängig gemacht werden!')) {
+      resetProgress();
+      renderMenu();
+    }
+  });
 }
 
-function showGame(lessonId) {
-  currentLesson = LESSONS.find(l => l.id === lessonId);
-  if (!currentLesson) return;
+function renderMenu() {
+  const progress = loadProgress();
+  const level = calculatePlayerLevel();
+  const title = getTitleForLevel(level);
+  const totalStars = getTotalStars();
+  const maxStars = LESSONS.length * 3;
   
+  // Header
+  document.getElementById('player-level').textContent = `Level ${level}`;
+  document.getElementById('player-title').textContent = title;
+  document.getElementById('star-count').textContent = `⭐ ${totalStars} / ${maxStars}`;
+  
+  // Progress bar
+  const progressPercent = (totalStars / maxStars) * 100;
+  document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+  
+  // Lessons grid
+  const grid = document.getElementById('lessons-grid');
+  grid.innerHTML = '';
+  
+  LESSONS.forEach(lesson => {
+    const card = document.createElement('div');
+    card.className = 'lesson-card';
+    const stars = progress[lesson.id] || 0;
+    
+    card.innerHTML = `
+      <div class="lesson-number">${lesson.id}</div>
+      <div class="lesson-name">${lesson.name}</div>
+      <div class="lesson-stars">
+        ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}
+      </div>
+    `;
+    
+    // Navigate to lesson page
+    card.addEventListener('click', () => {
+      window.location.href = `lesson.html?id=${lesson.id}`;
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ============== Game Logic (lesson.html) ==============
+function initGame() {
+  const params = new URLSearchParams(window.location.search);
+  const lessonId = parseInt(params.get('id'));
+  
+  if (!lessonId) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  currentLesson = LESSONS.find(l => l.id === lessonId);
+  if (!currentLesson) {
+    window.location.href = 'index.html';
+    return;
+  }
+
   previousLevel = calculatePlayerLevel();
   currentTextIndex = 0;
-  startNewText();
-  showView('game-view');
-  document.getElementById('lesson-title').textContent = currentLesson.name;
-  document.getElementById('lesson-progress').textContent = `Text ${currentTextIndex + 1}/${currentLesson.texts.length}`;
   
-  // Focus for keyboard input
+  // Update header title
+  document.getElementById('lesson-title').textContent = currentLesson.name;
+
+  startNewText();
+  
+  // Focus game
   document.getElementById('game-view').focus();
+  document.getElementById('game-view').addEventListener('keydown', handleKeyPress);
+  
+  // Controls
+  document.getElementById('back-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+  
+  document.getElementById('pause-btn').addEventListener('click', togglePause);
+  document.getElementById('pause-overlay').addEventListener('click', () => {
+    if (isPaused) togglePause();
+  });
+
+  // Result buttons
+  document.getElementById('retry-btn').addEventListener('click', () => {
+    window.location.reload();
+  });
+  
+  document.getElementById('next-btn').addEventListener('click', () => {
+    const nextLesson = LESSONS.find(l => l.id === currentLesson.id + 1);
+    if (nextLesson) {
+      window.location.href = `lesson.html?id=${nextLesson.id}`;
+    } else {
+      window.location.href = 'index.html';
+    }
+  });
+  
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+}
+
+function startNewText() {
+  currentText = currentLesson.texts[currentTextIndex];
+  currentCharIndex = 0;
+  errors = 0;
+  startTime = Date.now();
+  totalPausedTime = 0;
+  isPaused = false;
+  streak = 0;
+  
+  document.getElementById('lesson-progress').textContent = `Text ${currentTextIndex + 1}/${currentLesson.texts.length}`;
+  renderText();
+  updateStreak();
+}
+
+function renderText() {
+  const container = document.getElementById('text-display');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < currentText.length; i++) {
+    const span = document.createElement('span');
+    span.textContent = currentText[i] === ' ' ? '␣' : currentText[i];
+    
+    if (i < currentCharIndex) {
+      span.className = 'typed';
+    } else if (i === currentCharIndex) {
+      span.className = 'current';
+    } else {
+      span.className = 'pending';
+    }
+    
+    container.appendChild(span);
+  }
+}
+
+function handleKeyPress(e) {
+  if (isPaused) return;
+  
+  // Ignore modifiers
+  if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
+  
+  // Resume audio context
+  if (window.audioCtx && window.audioCtx.state === 'suspended') {
+    window.audioCtx.resume();
+  }
+  
+  const expectedChar = currentText[currentCharIndex];
+  
+  if (e.key === expectedChar) {
+    playClick();
+    currentCharIndex++;
+    streak++;
+    updateStreak();
+    renderText();
+    
+    if (currentCharIndex >= currentText.length) {
+      handleTextComplete();
+    }
+  } else if (e.key.length === 1) { 
+    playError();
+    errors++;
+    streak = 0;
+    updateStreak();
+    
+    const container = document.getElementById('text-display');
+    container.classList.add('shake');
+    setTimeout(() => container.classList.remove('shake'), 200);
+  }
+  
+  e.preventDefault();
+}
+
+function updateStreak() {
+  const gameView = document.getElementById('game-view');
+  if (!gameView) return;
+  
+  if (streak >= 10) {
+    gameView.classList.add('streak');
+  } else {
+    gameView.classList.remove('streak');
+  }
+}
+
+function handleTextComplete() {
+  currentTextIndex++;
+  
+  if (currentTextIndex >= currentLesson.texts.length) {
+    finishLesson();
+  } else {
+    startNewText();
+  }
+}
+
+function finishLesson() {
+  const endTime = Date.now();
+  const timeSpentMinutes = (endTime - startTime - totalPausedTime) / 1000 / 60;
+  
+  // Calculate based on the last text segment (consistent with original logic, simpler)
+  const textLength = currentText.length;
+  
+  // Accuracy
+  const accuracy = Math.max(0, Math.round(((textLength - errors) / textLength) * 100));
+  
+  // WPM
+  const words = textLength / 5;
+  const wpm = Math.round(words / Math.max(timeSpentMinutes, 0.001)); 
+  
+  // Star Calculation
+  // Speed 100wpm = 100%
+  // Average = (Speed% + Accuracy%) / 2
+  // 1 star: Avg >= 50%
+  // 2 stars: Avg >= 75%
+  // 3 stars: Accuracy == 100% AND Speed >= 100wpm
+  
+  const speedPercent = (wpm / 100) * 100;
+  const average = (speedPercent + accuracy) / 2;
+  
+  let stars = 0;
+  if (average >= 50) stars = 1;
+  if (average >= 75) stars = 2;
+  if (accuracy === 100 && wpm >= 100) stars = 3;
+  
+  // Minimum 1 star if completed (optional, adhering to "One star: average 50%")
+  // But usually 0 stars is valid. I'll stick to 0 if they do poorly.
+  
+  saveProgress(currentLesson.id, stars);
+  playWin();
+  
+  showResult(stars, accuracy, wpm);
 }
 
 function showResult(stars, accuracy, wpm) {
@@ -210,168 +418,8 @@ function showResult(stars, accuracy, wpm) {
     });
   }
   
-  showView('result-view');
-}
-
-// ============== Menu Rendering ==============
-function renderMenu() {
-  const progress = loadProgress();
-  const level = calculatePlayerLevel();
-  const title = getTitleForLevel(level);
-  const totalStars = getTotalStars();
-  const maxStars = LESSONS.length * 3;
-  
-  // Header
-  document.getElementById('player-level').textContent = `Level ${level}`;
-  document.getElementById('player-title').textContent = title;
-  document.getElementById('star-count').textContent = `⭐ ${totalStars} / ${maxStars}`;
-  
-  // Progress bar
-  const progressPercent = (totalStars / maxStars) * 100;
-  document.getElementById('progress-fill').style.width = `${progressPercent}%`;
-  
-  // Lessons grid
-  const grid = document.getElementById('lessons-grid');
-  grid.innerHTML = '';
-  
-  LESSONS.forEach(lesson => {
-    const card = document.createElement('div');
-    card.className = 'lesson-card';
-    const stars = progress[lesson.id] || 0;
-    
-    card.innerHTML = `
-      <div class="lesson-number">${lesson.id}</div>
-      <div class="lesson-name">${lesson.name}</div>
-      <div class="lesson-stars">
-        ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}
-      </div>
-    `;
-    
-    card.addEventListener('click', () => showGame(lesson.id));
-    grid.appendChild(card);
-  });
-}
-
-// ============== Game Logic ==============
-function startNewText() {
-  currentText = currentLesson.texts[currentTextIndex];
-  currentCharIndex = 0;
-  errors = 0;
-  totalChars = currentText.length;
-  startTime = Date.now();
-  totalPausedTime = 0;
-  isPaused = false;
-  streak = 0;
-  
-  renderText();
-  updateStreak();
-}
-
-function renderText() {
-  const container = document.getElementById('text-display');
-  container.innerHTML = '';
-  
-  for (let i = 0; i < currentText.length; i++) {
-    const span = document.createElement('span');
-    span.textContent = currentText[i] === ' ' ? '␣' : currentText[i];
-    
-    if (i < currentCharIndex) {
-      span.className = 'typed';
-    } else if (i === currentCharIndex) {
-      span.className = 'current';
-    } else {
-      span.className = 'pending';
-    }
-    
-    container.appendChild(span);
-  }
-}
-
-function handleKeyPress(e) {
-  if (isPaused) return;
-  
-  // Ignore modifier keys alone
-  if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') {
-    return;
-  }
-  
-  // Resume audio context if suspended (browser autoplay policy)
-  if (window.audioCtx && window.audioCtx.state === 'suspended') {
-    window.audioCtx.resume();
-  }
-  
-  const expectedChar = currentText[currentCharIndex];
-  
-  if (e.key === expectedChar) {
-    playClick();
-    currentCharIndex++;
-    streak++;
-    updateStreak();
-    renderText();
-    
-    // Check if text complete
-    if (currentCharIndex >= currentText.length) {
-      handleTextComplete();
-    }
-  } else if (e.key.length === 1) { // Ignore special keys like Backspace
-    playError();
-    errors++;
-    streak = 0;
-    updateStreak();
-    
-    // Visual error feedback
-    const container = document.getElementById('text-display');
-    container.classList.add('shake');
-    setTimeout(() => container.classList.remove('shake'), 200);
-  }
-  
-  e.preventDefault();
-}
-
-function updateStreak() {
-  const gameView = document.getElementById('game-view');
-  if (streak >= 10) {
-    gameView.classList.add('streak');
-  } else {
-    gameView.classList.remove('streak');
-  }
-}
-
-function handleTextComplete() {
-  currentTextIndex++;
-  document.getElementById('lesson-progress').textContent = `Text ${Math.min(currentTextIndex + 1, currentLesson.texts.length)}/${currentLesson.texts.length}`;
-  
-  if (currentTextIndex >= currentLesson.texts.length) {
-    // Lesson complete
-    finishLesson();
-  } else {
-    // Next text
-    startNewText();
-  }
-}
-
-function finishLesson() {
-  const endTime = Date.now();
-  const timeSpent = (endTime - startTime - totalPausedTime) / 1000 / 60; // minutes
-  
-  // Calculate total chars and errors across all texts
-  let totalTypedChars = 0;
-  currentLesson.texts.forEach(t => totalTypedChars += t.length);
-  
-  const accuracy = Math.max(0, Math.round(((totalTypedChars - errors) / totalTypedChars) * 100));
-  const words = totalTypedChars / 5; // Standard: 5 chars = 1 word
-  const wpm = Math.round(words / Math.max(timeSpent, 0.1));
-  
-  // Calculate stars
-  let stars = 1;
-  if (accuracy >= 90 && wpm >= 20) stars = 2;
-  if (accuracy >= 98 && wpm >= 30) stars = 3;
-  
-  // Save progress
-  saveProgress(currentLesson.id, stars);
-  playWin();
-  
-  showResult(stars, accuracy, wpm);
+  // Show overlay
+  document.getElementById('result-overlay').classList.remove('hidden');
 }
 
 function togglePause() {
@@ -391,42 +439,13 @@ function togglePause() {
   }
 }
 
-// ============== Event Listeners ==============
+// ============== Initialization ==============
 document.addEventListener('DOMContentLoaded', () => {
   initAudio();
-  showMenu();
   
-  // Keyboard input for game
-  document.getElementById('game-view').addEventListener('keydown', handleKeyPress);
-  
-  // Menu button
-  document.getElementById('back-btn').addEventListener('click', showMenu);
-  
-  // Pause button
-  document.getElementById('pause-btn').addEventListener('click', togglePause);
-  
-  // Resume from pause overlay
-  document.getElementById('pause-overlay').addEventListener('click', () => {
-    if (isPaused) togglePause();
-  });
-  
-  // Result buttons
-  document.getElementById('retry-btn').addEventListener('click', () => showGame(currentLesson.id));
-  document.getElementById('next-btn').addEventListener('click', () => {
-    const nextLesson = LESSONS.find(l => l.id === currentLesson.id + 1);
-    if (nextLesson) {
-      showGame(nextLesson.id);
-    } else {
-      showMenu();
-    }
-  });
-  document.getElementById('menu-btn').addEventListener('click', showMenu);
-  
-  // Reset progress
-  document.getElementById('reset-btn').addEventListener('click', () => {
-    if (confirm('Wirklich allen Fortschritt löschen? Das kann nicht rückgängig gemacht werden!')) {
-      resetProgress();
-      renderMenu();
-    }
-  });
+  if (document.getElementById('menu-view')) {
+    initMenu();
+  } else if (document.getElementById('game-view')) {
+    initGame();
+  }
 });
