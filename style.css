@@ -299,10 +299,54 @@ body::after {
   font-size: 1rem;
   color: var(--text-secondary); /* Empty star color as fallback */
   letter-spacing: 2px;
+  /* Define empty color for gradient star usage */
+  --star-empty: var(--text-secondary); 
 }
 
 .lesson-stars .earned {
   color: var(--gold);
+}
+
+.lesson-stars .half {
+  position: relative;
+  display: inline-block;
+  color: transparent;
+  background: linear-gradient(90deg, var(--gold) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* Ensure opacity matches empty stars if needed, but here empty has 0.3 opacity. 
+     The gradient uses var(--star-empty) which is fully opaque. 
+     So we should use an opaque color or transparent color for the right side? 
+     The right side should look like .empty. .empty has opacity 0.3.
+  */
+}
+/* Fix for half star right side to match .empty visually */
+.lesson-stars .half::after {
+  content: '★';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--star-empty);
+  opacity: 0.3;
+  z-index: -1;
+}
+/* But the gradient is on top. If I do transparent on right side, the ::after will show through? */
+/* A better approach for half star: */
+.lesson-stars .half {
+  background: linear-gradient(90deg, var(--gold) 50%, transparent 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; 
+  position: relative;
+}
+.lesson-stars .half::before {
+   content: '★';
+   position: absolute;
+   left: 0;
+   top: 0;
+   color: var(--star-empty);
+   opacity: 0.3;
+   z-index: -1;
 }
 
 .lesson-stars .empty {
@@ -544,14 +588,34 @@ body::after {
 #result-stars .star {
   display: inline-block;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --star-empty: rgba(255,255,255,0.1); 
 }
 #result-stars .star.earned {
   color: var(--gold);
   filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.6));
   transform: scale(1.1);
 }
+#result-stars .star.half {
+  background: linear-gradient(90deg, var(--gold) 50%, transparent 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; 
+  position: relative;
+  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.3)); /* Slightly less glow for half star */
+  /* Scale similar to earned? */
+  transform: scale(1.05);
+}
+#result-stars .star.half::before {
+   content: '★';
+   position: absolute;
+   left: 0;
+   top: 0;
+   color: var(--star-empty);
+   z-index: -1;
+}
+
 #result-stars .star.empty {
-  color: rgba(255,255,255,0.1);
+  color: var(--star-empty);
 }
 
 .result-stats {

@@ -174,7 +174,7 @@ function renderMenu() {
       <div class="lesson-number">${lesson.id}</div>
       <div class="lesson-name">${lesson.name}</div>
       <div class="lesson-stars">
-        ${'<span class="earned">★</span>'.repeat(stars)}${'<span class="empty">☆</span>'.repeat(5 - stars)}
+        ${generateStarsHTML(stars)}
       </div>
     `;
     
@@ -185,6 +185,21 @@ function renderMenu() {
     });
     grid.appendChild(card);
   });
+}
+
+// Helper for rendering stars (full, half, empty)
+function generateStarsHTML(stars) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    if (stars >= i) {
+      html += '<span class="star earned">★</span>';
+    } else if (stars > i - 1) {
+      html += '<span class="star half">★</span>';
+    } else {
+      html += '<span class="star empty">★</span>';
+    }
+  }
+  return html;
 }
 
 // ============== Game Logic (lesson.html) ==============
@@ -247,6 +262,15 @@ function initGame() {
   
   document.getElementById('menu-btn').addEventListener('click', () => {
     window.location.href = 'index.html';
+  });
+
+  // Allow using Enter key to proceed from result screen
+  document.addEventListener('keydown', (e) => {
+    const resultOverlay = document.getElementById('result-overlay');
+    if (resultOverlay && !resultOverlay.classList.contains('hidden') && e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('next-btn').click();
+    }
   });
 }
 
@@ -399,7 +423,7 @@ function finishLesson() {
   
   let stars = 0;
   if (accuracyStars > 0 && speedStars > 0) {
-    stars = Math.round((accuracyStars + speedStars) / 2);
+    stars = (accuracyStars + speedStars) / 2;
   }
   
   saveProgress(currentLesson.id, stars);
@@ -416,13 +440,7 @@ function showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStar
   
   // Render stars
   const starsContainer = document.getElementById('result-stars');
-  starsContainer.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
-    const star = document.createElement('span');
-    star.className = 'star ' + (i <= stars ? 'earned' : 'empty');
-    star.textContent = '★';
-    starsContainer.appendChild(star);
-  }
+  starsContainer.innerHTML = generateStarsHTML(stars);
   
   // Stats
   function getStarsString(count) { // Helper to stringify stars
@@ -463,6 +481,10 @@ function showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStar
   
   // Show overlay
   document.getElementById('result-overlay').classList.remove('hidden');
+  
+  // Focus next button for keyboard navigation
+  const nextBtn = document.getElementById('next-btn');
+  if (nextBtn) nextBtn.focus();
 }
 
 function togglePause() {

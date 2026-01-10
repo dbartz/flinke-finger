@@ -43,7 +43,7 @@
     - 60% = 3 stars
     - 80% = 4 stars
     - 100% = 5 stars
-  - **Total Stars**: Average of Accuracy Stars and Speed Stars (rounded).
+  - **Total Stars**: Average of Accuracy Stars and Speed Stars (can be X.5).
     - If either Accuracy Stars or Speed Stars is 0, Total Stars is 0.
 - **Persistence**: Save `stars` per lesson in `localStorage`. Level and Titles are derived from this data.
 - **Reset Progress**: Option in settings/menu to wipe `localStorage` and start fresh.
