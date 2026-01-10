@@ -30,12 +30,20 @@
 - **Titles**:
   - Unlock a fancy new title every 5 levels (e.g., Level 5: "Tasten-Neuling", Level 10: "Buchstaben-Jäger", Level 100: "Tipp-Legende").
   - Titles displayed prominently next to the username/avatar.
-- **Lesson Stars**: 1 to 3 stars per lesson based on accuracy/speed.
-  - Speed: 50wpm = 100%.
-  - Accuracy: Percentage of correct keystrokes.
-  - One star: Average (Speed% + Accuracy%) >= 50%.
-  - Two stars: Average (Speed% + Accuracy%) >= 75%.
-  - Three stars: Accuracy = 100% AND Speed >= 50wpm (100%).
+- **Lesson Stars**: 1 to 5 stars per lesson based on accuracy/speed average.
+  - **Accuracy Stars**:
+    - 50% = 1 star
+    - 70% = 2 stars
+    - 80% = 3 stars
+    - 90% = 4 stars
+    - 100% = 5 stars
+  - **Speed Stars** (where 50wpm = 100% speed):
+    - 50% = 1 star
+    - 70% = 2 stars
+    - 80% = 3 stars
+    - 90% = 4 stars
+    - 100% = 5 stars
+  - **Total Stars**: Average of Accuracy Stars and Speed Stars (rounded).
 - **Persistence**: Save `stars` per lesson in `localStorage`. Level and Titles are derived from this data.
 - **Reset Progress**: Option in settings/menu to wipe `localStorage` and start fresh.
 

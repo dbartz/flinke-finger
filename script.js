@@ -24,7 +24,7 @@ function resetProgress() {
 
 function calculatePlayerLevel() {
   const progress = loadProgress();
-  const totalPossibleStars = LESSONS.length * 3;
+  const totalPossibleStars = LESSONS.length * 5;
   const earnedStars = Object.values(progress).reduce((sum, stars) => sum + stars, 0);
   // Level 1-100, always start at 1
   return Math.floor((earnedStars / totalPossibleStars) * 99) + 1;
@@ -150,7 +150,7 @@ function renderMenu() {
   const level = calculatePlayerLevel();
   const title = getTitleForLevel(level);
   const totalStars = getTotalStars();
-  const maxStars = LESSONS.length * 3;
+  const maxStars = LESSONS.length * 5;
   
   // Header
   document.getElementById('player-level').textContent = `Level ${level}`;
@@ -174,9 +174,10 @@ function renderMenu() {
       <div class="lesson-number">${lesson.id}</div>
       <div class="lesson-name">${lesson.name}</div>
       <div class="lesson-stars">
-        ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}
+        ${'<span class="earned">★</span>'.repeat(stars)}${'<span class="empty">☆</span>'.repeat(5 - stars)}
       </div>
     `;
+    
     
     // Navigate to lesson page
     card.addEventListener('click', () => {
@@ -368,22 +369,26 @@ function finishLesson() {
   const wpm = Math.round(words / Math.max(timeSpentMinutes, 0.001)); 
   
   // Star Calculation
-  // Speed 50wpm = 100%
-  // Average = (Speed% + Accuracy%) / 2
-  // 1 star: Avg >= 50%
-  // 2 stars: Avg >= 75%
-  // 3 stars: Accuracy == 100% AND Speed >= 50wpm
+  // 1 to 5 stars per lesson based on accuracy/speed average.
+  // Accuracy Stars: 50 -> 1, 70 -> 2, 80 -> 3, 90 -> 4, 100 -> 5
+  // Speed Stars (50wpm=100%): 50% -> 1, 70% -> 2, 80% -> 3, 90% -> 4, 100% -> 5
+  // Total: Average of Accuracy and Speed stars
   
   const speedPercent = Math.round((wpm / 50) * 100);
-  const average = (speedPercent + accuracy) / 2;
   
-  let stars = 0;
-  if (average >= 50) stars = 1;
-  if (average >= 75) stars = 2;
-  if (accuracy === 100 && wpm >= 50) stars = 3;
+  function getStarsFromPercent(percent) {
+    if (percent >= 100) return 5;
+    if (percent >= 90) return 4;
+    if (percent >= 80) return 3;
+    if (percent >= 70) return 2;
+    if (percent >= 50) return 1;
+    return 0;
+  }
   
-  // Minimum 1 star if completed (optional, adhering to "One star: average 50%")
-  // But usually 0 stars is valid. I'll stick to 0 if they do poorly.
+  const accuracyStars = getStarsFromPercent(accuracy);
+  const speedStars = getStarsFromPercent(speedPercent);
+  
+  const stars = Math.round((accuracyStars + speedStars) / 2);
   
   saveProgress(currentLesson.id, stars);
   playWin();
@@ -400,7 +405,7 @@ function showResult(stars, accuracy, wpm, speedPercent) {
   // Render stars
   const starsContainer = document.getElementById('result-stars');
   starsContainer.innerHTML = '';
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 5; i++) {
     const star = document.createElement('span');
     star.className = 'star ' + (i <= stars ? 'earned' : 'empty');
     star.textContent = '★';

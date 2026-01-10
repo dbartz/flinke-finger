@@ -297,8 +297,17 @@ body::after {
 
 .lesson-stars {
   font-size: 1rem;
-  color: var(--text-secondary); /* Empty star color */
+  color: var(--text-secondary); /* Empty star color as fallback */
   letter-spacing: 2px;
+}
+
+.lesson-stars .earned {
+  color: var(--gold);
+}
+
+.lesson-stars .empty {
+  color: var(--text-secondary);
+  opacity: 0.3;
 }
 
 /* Active stars need a special class or simpler styling assumption */
