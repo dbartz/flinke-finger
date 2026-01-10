@@ -122,6 +122,7 @@ let currentLesson = null;
 let currentTextIndex = 0;
 let currentCharIndex = 0;
 let currentText = '';
+let charStatus = []; // 'correct' or 'incorrect'
 let errors = 0;
 let startTime = null;
 let isPaused = false;
@@ -243,6 +244,7 @@ function initGame() {
 function startNewText() {
   currentText = currentLesson.texts[currentTextIndex];
   currentCharIndex = 0;
+  charStatus = new Array(currentText.length).fill(null);
   errors = 0;
   startTime = Date.now();
   totalPausedTime = 0;
@@ -263,7 +265,11 @@ function renderText() {
     span.textContent = currentText[i] === ' ' ? '␣' : currentText[i];
     
     if (i < currentCharIndex) {
-      span.className = 'typed';
+      if (charStatus[i] === 'correct') {
+        span.className = 'typed correct';
+      } else {
+        span.className = 'typed incorrect';
+      }
     } else if (i === currentCharIndex) {
       span.className = 'current';
     } else {
@@ -289,6 +295,7 @@ function handleKeyPress(e) {
   
   if (e.key === expectedChar) {
     playClick();
+    charStatus[currentCharIndex] = 'correct';
     currentCharIndex++;
     streak++;
     updateStreak();
@@ -299,13 +306,20 @@ function handleKeyPress(e) {
     }
   } else if (e.key.length === 1) { 
     playError();
+    charStatus[currentCharIndex] = 'incorrect';
     errors++;
+    currentCharIndex++; // Advance even on error
     streak = 0;
     updateStreak();
-    
+    renderText();
+
     const container = document.getElementById('text-display');
     container.classList.add('shake');
     setTimeout(() => container.classList.remove('shake'), 200);
+
+    if (currentCharIndex >= currentText.length) {
+      handleTextComplete();
+    }
   }
   
   e.preventDefault();
