@@ -1,0 +1,447 @@
+/* German Typing Trainer - Styles */
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --bg: #0f172a;
+  --bg-light: #1e293b;
+  --bg-lighter: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --gold: #fbbf24;
+  --streak-glow: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ============== Views ============== */
+.view {
+  display: none;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.view.active {
+  display: block;
+}
+
+/* ============== Menu View ============== */
+.menu-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--bg-light), var(--bg-lighter));
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.menu-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary), #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.player-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+#player-level {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--gold);
+}
+
+#player-title {
+  font-size: 1.2rem;
+  color: var(--primary);
+  background: var(--bg);
+  padding: 0.3rem 1rem;
+  border-radius: 2rem;
+}
+
+#star-count {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  margin: 1rem auto;
+  overflow: hidden;
+}
+
+#progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #a855f7);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+/* ============== Lessons Grid ============== */
+#lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+.lesson-card {
+  background: var(--bg-light);
+  border-radius: 1rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.lesson-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+}
+
+.lesson-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-name {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson-stars {
+  font-size: 1.2rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+/* ============== Reset Button ============== */
+.menu-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+#reset-btn {
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+#reset-btn:hover {
+  background: var(--error);
+  color: white;
+}
+
+/* ============== Game View ============== */
+#game-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+#game-view.streak {
+  box-shadow: inset 0 0 100px rgba(251, 191, 36, 0.2);
+}
+
+#game-view.streak::before {
+  content: '🔥';
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  animation: pulse 0.5s ease infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 2rem;
+}
+
+#lesson-title {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+#lesson-progress {
+  color: var(--text-muted);
+}
+
+.game-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-controls button {
+  background: var(--bg-light);
+  border: none;
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.game-controls button:hover {
+  background: var(--bg-lighter);
+}
+
+/* ============== Text Display ============== */
+#text-display {
+  font-size: 2.5rem;
+  font-family: 'Courier New', monospace;
+  background: var(--bg-light);
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  max-width: 90%;
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: 2px;
+}
+
+#text-display span {
+  transition: all 0.1s ease;
+}
+
+#text-display .typed {
+  color: var(--success);
+}
+
+#text-display .current {
+  background: var(--primary);
+  color: white;
+  border-radius: 4px;
+  padding: 0 2px;
+  animation: blink 1s ease infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+#text-display .pending {
+  color: var(--text-muted);
+}
+
+#text-display.shake {
+  animation: shake 0.2s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.typing-hint {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ============== Pause Overlay ============== */
+#pause-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#pause-overlay.hidden {
+  display: none;
+}
+
+#pause-overlay .pause-content {
+  text-align: center;
+}
+
+#pause-overlay h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+#pause-overlay p {
+  color: var(--text-muted);
+}
+
+/* ============== Result View ============== */
+#result-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.result-content {
+  background: var(--bg-light);
+  padding: 3rem;
+  border-radius: 1.5rem;
+  max-width: 500px;
+}
+
+.result-content h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+#result-stars {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+#result-stars .star.earned {
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+#result-stars .star.empty {
+  color: var(--bg-lighter);
+}
+
+.result-stats {
+  margin-bottom: 1.5rem;
+}
+
+#result-accuracy,
+#result-wpm {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0;
+}
+
+#level-up-message,
+#new-title-message {
+  font-size: 1.3rem;
+  color: var(--gold);
+  margin: 0.5rem 0;
+  animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.result-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.result-buttons button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+#retry-btn {
+  background: var(--bg-lighter);
+  color: var(--text);
+}
+
+#next-btn {
+  background: var(--primary);
+  color: white;
+}
+
+#menu-btn {
+  background: transparent;
+  border: 1px solid var(--text-muted) !important;
+  color: var(--text-muted);
+}
+
+.result-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ============== Responsive ============== */
+@media (max-width: 600px) {
+  .view {
+    padding: 1rem;
+  }
+  
+  .menu-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  #text-display {
+    font-size: 1.5rem;
+    padding: 1.5rem;
+  }
+  
+  #lessons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
