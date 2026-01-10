@@ -652,6 +652,12 @@ body::after {
   display: none !important;
 }
 
+.mini-stars {
+  color: var(--gold);
+  margin-left: 0.5rem;
+  letter-spacing: 1px;
+}
+
 /* Responsive */
 @media (max-width: 650px) {
   .header-inner {

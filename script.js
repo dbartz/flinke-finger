@@ -376,7 +376,7 @@ function finishLesson() {
   
   const speedPercent = Math.round((wpm / 50) * 100);
   
-  function getStarsFromPercent(percent) {
+  function getAccuracyStars(percent) {
     if (percent >= 100) return 5;
     if (percent >= 90) return 4;
     if (percent >= 80) return 3;
@@ -385,18 +385,30 @@ function finishLesson() {
     return 0;
   }
   
-  const accuracyStars = getStarsFromPercent(accuracy);
-  const speedStars = getStarsFromPercent(speedPercent);
+  function getSpeedStars(percent) {
+    if (percent >= 100) return 5;
+    if (percent >= 80) return 4;
+    if (percent >= 60) return 3;
+    if (percent >= 40) return 2;
+    if (percent >= 15) return 1;
+    return 0;
+  }
   
-  const stars = Math.round((accuracyStars + speedStars) / 2);
+  const accuracyStars = getAccuracyStars(accuracy);
+  const speedStars = getSpeedStars(speedPercent);
+  
+  let stars = 0;
+  if (accuracyStars > 0 && speedStars > 0) {
+    stars = Math.round((accuracyStars + speedStars) / 2);
+  }
   
   saveProgress(currentLesson.id, stars);
   playWin();
   
-  showResult(stars, accuracy, wpm, speedPercent);
+  showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStars);
 }
 
-function showResult(stars, accuracy, wpm, speedPercent) {
+function showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStars) {
   const newLevel = calculatePlayerLevel();
   const newTitle = getTitleForLevel(newLevel);
   const leveledUp = newLevel > previousLevel;
@@ -413,8 +425,13 @@ function showResult(stars, accuracy, wpm, speedPercent) {
   }
   
   // Stats
-  document.getElementById('result-accuracy').textContent = `Genauigkeit: ${accuracy}%`;
-  document.getElementById('result-wpm').textContent = `Geschwindigkeit: ${wpm} WPM (${speedPercent}%)`;
+  function getStarsString(count) { // Helper to stringify stars
+     return '★'.repeat(count) + '☆'.repeat(5 - count);
+  }
+
+  document.getElementById('result-accuracy').innerHTML = ` Genauigkeit: ${accuracy}% <span class="mini-stars">${getStarsString(accuracyStars)}</span>`;
+  document.getElementById('result-wpm').innerHTML = `Geschwindigkeit: ${wpm} WPM (${speedPercent}%) <span class="mini-stars">${getStarsString(speedStars)}</span>`;
+  
   
   // Level up message
   const levelUpEl = document.getElementById('level-up-message');
