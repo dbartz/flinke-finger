@@ -419,6 +419,51 @@ function startNewText() {
   document.getElementById('lesson-progress').textContent = `Text ${currentTextIndex + 1}/${currentLesson.texts.length}`;
   renderText();
   updateStreak();
+  highlightNextKey();
+  updateHands();
+}
+
+function updateHands() {
+  // Clear previous
+  document.querySelectorAll('.finger.active-finger').forEach(f => f.classList.remove('active-finger'));
+  
+  if (currentCharIndex >= currentText.length) return;
+  
+  const char = currentText[currentCharIndex];
+  let normalizedKey = char.toLowerCase();
+  if (char === ' ') normalizedKey = 'space';
+  
+  // Find which finger(s) are responsible
+  for (const [fingerId, keys] of Object.entries(FINGER_MAPPING)) {
+    // Check both normalized and raw char (for symbols)
+    if (keys.includes(normalizedKey) || keys.includes(char)) {
+       const fingerEl = document.getElementById(fingerId);
+       if (fingerEl) fingerEl.classList.add('active-finger');
+    }
+  }
+  
+  // Handle Shift logic
+  // If char is uppercase and is a letter, or is a symbol requiring shift
+  // Simplified logic: Check if char != normalized (for letters) or is specific symbol
+  const shiftSymbols = ['!', '"', '§', '$', '%', '&', '/', '(', ')', '=', '?', '`', '*', '>', ';', ':'];
+  const needsShift = (char !== normalizedKey && char.toUpperCase() !== char.toLowerCase()) || shiftSymbols.includes(char);
+  
+  if (needsShift) {
+      // If right hand is typing, use left shift. If left hand, use right shift.
+      const rightHandFingers = ['r-index', 'r-middle', 'r-ring', 'r-pinky', 'r-thumb'];
+      let isRightHandChar = false;
+      
+      for (const [fingerId, keys] of Object.entries(FINGER_MAPPING)) {
+         if (keys.includes(normalizedKey) && rightHandFingers.includes(fingerId)) {
+             isRightHandChar = true;
+             break;
+         }
+      }
+      
+      const shiftFingerId = isRightHandChar ? 'l-pinky' : 'r-pinky';
+      const shiftEl = document.getElementById(shiftFingerId);
+      if (shiftEl) shiftEl.classList.add('active-finger');
+  }
 }
 
 function renderText() {
@@ -483,6 +528,10 @@ function handleKeyPress(e) {
   if (e.key === expectedChar) {
     playClick();
     charStatus[currentCharIndex] = 'correct';
+    
+    // Feedback
+    showKeyFeedback(e.key, 'success');
+    
     currentCharIndex++;
     streak++;
     updateStreak();
@@ -490,10 +539,17 @@ function handleKeyPress(e) {
     
     if (currentCharIndex >= currentText.length) {
       handleTextComplete();
+    } else {
+        highlightNextKey();
+        updateHands();
     }
   } else if (e.key.length === 1) { 
     playError();
     charStatus[currentCharIndex] = 'incorrect';
+    
+    // Feedback
+    showKeyFeedback(e.key, 'error');
+    
     totalLessonErrors++;
     currentCharIndex++; // Advance even on error
     streak = 0;
@@ -506,10 +562,44 @@ function handleKeyPress(e) {
 
     if (currentCharIndex >= currentText.length) {
       handleTextComplete();
+    } else {
+        highlightNextKey();
+        updateHands();
     }
   }
   
   e.preventDefault();
+}
+
+function showKeyFeedback(key, type) {
+    const keys = document.querySelectorAll('.key');
+    let normalized = key.toLowerCase();
+    if (key === ' ') normalized = 'space';
+    
+    keys.forEach(k => {
+        if (k.dataset.key === normalized) {
+            k.classList.add(type);
+            setTimeout(() => k.classList.remove(type), 200);
+        }
+    });
+}
+
+function highlightNextKey() {
+    // Clear previous
+    document.querySelectorAll('.key.target').forEach(k => k.classList.remove('target'));
+    
+    if (currentCharIndex >= currentText.length) return;
+    
+    const char = currentText[currentCharIndex];
+    let normalized = char.toLowerCase();
+    if (char === ' ') normalized = 'space';
+   
+    const keys = document.querySelectorAll('.key');
+    keys.forEach(k => {
+        if (k.dataset.key === normalized) {
+            k.classList.add('target');
+        }
+    });
 }
 
 function updateStreak() {
@@ -651,6 +741,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============== Keyboard Logic ==============
+const FINGER_MAPPING = {
+  'l-pinky': ['^', '°', '1', '!', 'q', 'a', 'y', '<', '>', '|', 'shift-l'],
+  'l-ring': ['2', '"', 'w', 's', 'x'],
+  'l-middle': ['3', '§', 'e', 'd', 'c'],
+  'l-index': ['4', '$', '5', '%', 'r', 't', 'f', 'g', 'v', 'b'],
+  'l-thumb': ['space'],
+  'r-thumb': ['space'],
+  'r-index': ['6', '&', '7', '/', 'z', 'u', 'h', 'j', 'n', 'm'],
+  'r-middle': ['8', '(', 'i', 'k', ',', ';'],
+  'r-ring': ['9', ')', 'o', 'l', '.', ':'],
+  'r-pinky': ['0', '=', 'ß', '?', 'p', 'ö', '-', '_', 'ä', 'ü', '+', '*', '#', "'", 'enter', 'shift-r']
+};
+
 const KEYBOARD_LAYOUT = [
   ['^', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'ß', '´'],
   ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '+'],

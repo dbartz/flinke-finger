@@ -28,10 +28,38 @@
       <!-- Current text will be rendered here -->
     </div>
     
-    <div id="keyboard-container">
-      <!-- Keyboard will be rendered here -->
+    <div id="input-area">
+      <div id="hand-l-container" class="hand-container">
+        <svg viewBox="0 0 180 220" class="hand-svg">
+          <g id="hand-left" transform="translate(15, 20)">
+            <path class="hand-outline" d="M10,120 L115,120 L115,160 C115,200 10,200 10,160 Z" />
+            <path id="l-pinky" class="finger" d="M10,120 L10,70 C10,50 32,50 32,70 L32,120 Z" />
+            <path id="l-ring" class="finger" d="M37,120 L37,50 C37,30 59,30 59,50 L59,120 Z" />
+            <path id="l-middle" class="finger" d="M64,120 L64,30 C64,10 86,10 86,30 L86,120 Z" />
+            <path id="l-index" class="finger" d="M91,120 L91,50 C91,30 113,30 113,50 L113,120 Z" />
+            <path id="l-thumb" class="finger" d="M118,140 L150,155 L135,180 L118,160 Z" />
+          </g>
+        </svg>
+      </div>
+
+      <div id="keyboard-container">
+        <!-- Keyboard will be rendered here -->
+      </div>
+      
+      <div id="hand-r-container" class="hand-container">
+        <svg viewBox="0 0 180 220" class="hand-svg">
+          <g id="hand-right" transform="translate(165, 20) scale(-1, 1)">
+            <path class="hand-outline" d="M10,120 L115,120 L115,160 C115,200 10,200 10,160 Z" />
+            <path id="r-pinky" class="finger" d="M10,120 L10,70 C10,50 32,50 32,70 L32,120 Z" />
+            <path id="r-ring" class="finger" d="M37,120 L37,50 C37,30 59,30 59,50 L59,120 Z" />
+            <path id="r-middle" class="finger" d="M64,120 L64,30 C64,10 86,10 86,30 L86,120 Z" />
+            <path id="r-index" class="finger" d="M91,120 L91,50 C91,30 113,30 113,50 L113,120 Z" />
+            <path id="r-thumb" class="finger" d="M118,140 L150,155 L135,180 L118,160 Z" />
+          </g>
+        </svg>
+      </div>
     </div>
-    
+
     <p class="typing-hint">Tippe den Text ab. Drücke die richtige Taste!</p>
   </div>
   
