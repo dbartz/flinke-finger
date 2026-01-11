@@ -23,13 +23,19 @@
 
 ### RPG Progression System
 
+- **Structure**:
+  - The game is divided into **10 Stages**.
+  - Each Stage contains **5 Lectures (Lessons)**.
+  - Total: 50 Lessons.
+- **Progression Gate (Unlocking)**:
+  - Lessons are linear.
+  - A lesson is **grayed out/locked** until the player earns **at least 3 stars** in the previous lesson.
+  - Completing all 5 lessons in a stage completes the Stage.
 - **Player Level (1-100)**:
-  - Calculated dynamically: `Math.floor((Total Stars Earned / Total Possible Stars) * 99) + 1`.
-  - Ensures player always starts at Level 1.
-  - Motivating progress bar on the Landing Page.
+  - Calculated dynamically based on total stars.
+  - Displays progress globally.
 - **Titles**:
-  - Unlock a fancy new title every 5 levels (e.g., Level 5: "Tasten-Neuling", Level 10: "Buchstaben-Jäger", Level 100: "Tipp-Legende").
-  - Titles displayed prominently next to the username/avatar.
+  - Unlock new titles every 5 levels.
 - **Lesson Stars**: 1 to 5 stars per lesson based on accuracy/speed average.
   - **Accuracy Stars**:
     - 50% = 1 star
@@ -45,8 +51,65 @@
     - 100% = 5 stars
   - **Total Stars**: Average of Accuracy Stars and Speed Stars (can be X.5).
     - If either Accuracy Stars or Speed Stars is 0, Total Stars is 0.
-- **Persistence**: Save `stars` per lesson in `localStorage`. Level and Titles are derived from this data.
-- **Reset Progress**: Option in settings/menu to wipe `localStorage` and start fresh.
+- **Persistence**: Save `stars` per lesson in `localStorage`.
+- **Reset Progress**: Option to wipe data.
+
+### Curriculum Plan (10 Stages)
+
+**Stage 1: The Foundation (Home Row)**
+
+- **Topic**: Use of the 8 basic keys in the standard position (Grundstellung).
+- **Scope**:
+  - Lesson 1: Left Index (F) & Right Index (J)
+  - Lesson 2: Left Middle (D) & Right Middle (K)
+  - Lesson 3: Left Ring (S) & Right Ring (L)
+  - Lesson 4: Left Pinky (A) & Right Pinky (Ö)
+  - Lesson 5: All Home Row keys combined.
+
+**Stage 2: Reaching In & Up (Strong Fingers)**
+
+- **Topic**: Expanding to the central column and easy upper reach.
+- **Scope**: Keys G, H (Index lateral) and E, I (Middle/Index up).
+
+**Stage 3: Upper Row Expansion**
+
+- **Topic**: Mastering the upper row with index and ring fingers.
+- **Scope**: Keys R, U, T, Z (German layout consideration).
+
+**Stage 4: Upper Row Completion**
+
+- **Topic**: Weak fingers on the upper row.
+- **Scope**: Keys W, O, Q, P.
+
+**Stage 5: Lower Row Descent (Strong Fingers)**
+
+- **Topic**: Reaching down with index fingers.
+- **Scope**: Keys V, B, N, M.
+
+**Stage 6: Lower Row Completion**
+
+- **Topic**: Weak fingers on the lower row.
+- **Scope**: Keys C, X, Y.
+
+**Stage 7: Capitalization**
+
+- **Topic**: Using the Shift keys.
+- **Scope**: Left Shift, Right Shift, typing Nouns (Capital letters).
+
+**Stage 8: German Character Set**
+
+- **Topic**: Special German characters.
+- **Scope**: Keys Ä, Ü, ß (and reviewing Ö).
+
+**Stage 9: Punctuation & Numbers**
+
+- **Topic**: Sentence structure and basic numeracy.
+- **Scope**: Period, Comma, Dash, Numbers 0-9.
+
+**Stage 10: Mastery & Flow**
+
+- **Topic**: Integration of all keys.
+- **Scope**: Complex sentences, speed drills, mixed content.
 
 ### Gamification & Fun
 
@@ -70,16 +133,20 @@
 ## 3. Implementation Steps
 
 1. **Scaffold**: Setup files and `assets` folder.
-2. **Data**: Define 20+ initial lessons in `data.js` to ensure the 100-level scale feels meaningful. Define `Titles` array.
+2. **Data**: Define **50 lessons** (10 Stages x 5 Lectures) in `data.js`.
 3. **State Management**:
     - `calculatePlayerLevel()` function (Start at 1).
     - `resetProgress()` function.
     - `getTitleForLevel(level)` function.
+    - **Unlock Logic**: Function to check if previous lesson has >= 3 stars.
 4. **Game Loop**:
     - Update logic to re-calculate player level after every finished lesson.
     - Implement Pause/Resume logic.
     - Check for "Level Up" or "New Title" events to trigger specific celebrations.
-5. **UI Updates**: Add the Level/Title header and Reset/Pause buttons.
+5. **UI Updates**:
+    - Update `index.html` to group lessons by Stage.
+    - Visual indicator for "Locked" lessons (grayed out).
+    - Add the Level/Title header and Reset/Pause buttons.
 6. **Gamification**: Confetti, Streaks, Sounds.
 7. **Styling**: Kid-friendly theme.
 

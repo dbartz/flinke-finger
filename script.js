@@ -164,27 +164,81 @@ function renderMenu() {
   // Lessons grid
   const grid = document.getElementById('lessons-grid');
   grid.innerHTML = '';
+
+  // Group lessons by stage
+  const STAGE_SIZE = 5;
+  const stageNames = [
+    "Stage 1: Grundstellung",
+    "Stage 2: Zeigefinger & Mitte",
+    "Stage 3: Obere Reihe",
+    "Stage 4: Obere Reihe Rand",
+    "Stage 5: Untere Reihe",
+    "Stage 6: Untere Reihe Rand",
+    "Stage 7: Großschreibung",
+    "Stage 8: Sonderzeichen",
+    "Stage 9: Satzzeichen & Zahlen",
+    "Stage 10: Meisterschaft"
+  ];
   
-  LESSONS.forEach(lesson => {
-    const card = document.createElement('div');
-    card.className = 'lesson-card';
-    const stars = progress[lesson.id] || 0;
+  for (let i = 0; i < LESSONS.length; i += STAGE_SIZE) {
+    const stageLessons = LESSONS.slice(i, i + STAGE_SIZE);
+    const stageIndex = i / STAGE_SIZE;
     
-    card.innerHTML = `
-      <div class="lesson-number">${lesson.id}</div>
-      <div class="lesson-name">${lesson.name}</div>
-      <div class="lesson-stars">
-        ${generateStarsHTML(stars)}
-      </div>
-    `;
+    // Create Stage Container
+    const stageContainer = document.createElement('div');
+    stageContainer.className = 'stage-container';
     
+    const stageHeader = document.createElement('h2');
+    stageHeader.className = 'stage-header';
+    stageHeader.textContent = stageNames[stageIndex] || `Stage ${stageIndex + 1}`;
+    stageContainer.appendChild(stageHeader);
     
-    // Navigate to lesson page
-    card.addEventListener('click', () => {
-      window.location.href = `lesson.html?id=${lesson.id}`;
+    const stageGrid = document.createElement('div');
+    stageGrid.className = 'stage-grid';
+    
+    stageLessons.forEach(lesson => {
+      const card = document.createElement('div');
+      const stars = progress[lesson.id] || 0;
+      
+      // Determine lock status
+      let isLocked = false;
+      if (lesson.id > 1) {
+        const prevLessonId = lesson.id - 1;
+        const prevStars = progress[prevLessonId] || 0;
+        if (prevStars < 3) {
+          isLocked = true;
+        }
+      }
+      
+      card.className = `lesson-card ${isLocked ? 'locked' : 'unlocked'}`;
+      
+      let html = `
+        <div class="lesson-number">${lesson.id}</div>
+        <div class="lesson-name">${lesson.name}</div>
+        <div class="lesson-stars">
+      `;
+      
+      if (isLocked) {
+        html += '<span class="lock-icon">🔒</span>';
+      } else {
+        html += generateStarsHTML(stars);
+      }
+      
+      html += `</div>`;
+      card.innerHTML = html;
+      
+      if (!isLocked) {
+        card.addEventListener('click', () => {
+          window.location.href = `lesson.html?id=${lesson.id}`;
+        });
+      }
+      
+      stageGrid.appendChild(card);
     });
-    grid.appendChild(card);
-  });
+    
+    stageContainer.appendChild(stageGrid);
+    grid.appendChild(stageContainer);
+  }
 }
 
 // Helper for rendering stars (full, half, empty)
@@ -216,6 +270,17 @@ function initGame() {
   if (!currentLesson) {
     window.location.href = 'index.html';
     return;
+  }
+
+  // Check lock status
+  if (lessonId > 1) {
+    const progress = loadProgress();
+    const prevStars = progress[lessonId - 1] || 0;
+    if (prevStars < 3) {
+      alert("Diese Lektion ist noch gesperrt! Du brauchst 3 Sterne in der vorherigen Lektion.");
+      window.location.href = 'index.html';
+      return;
+    }
   }
 
   previousLevel = calculatePlayerLevel();
