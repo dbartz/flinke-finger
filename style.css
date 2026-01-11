@@ -85,7 +85,7 @@ body::after {
   display: none;
   min-height: 100vh;
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 100%; /* Was 1200px, let specific view handle width */
   margin: 0 auto;
   animation: fadeIn 0.4s ease-out;
 }
@@ -101,6 +101,106 @@ body::after {
 }
 
 /* ============== Menu View ============== */
+#menu-view {
+  display: flex !important; /* Force sidebar layout, override .view.active column */
+  flex-direction: row !important;
+  gap: 3rem;
+  align-items: flex-start;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+#stage-toc {
+  width: 300px;
+  min-width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 2rem;
+  background: var(--surface);
+  backdrop-filter: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  z-index: 10;
+}
+
+#stage-toc h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+#toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.toc-item a {
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+}
+
+.toc-item a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toc-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.toc-badge {
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  width: fit-content;
+}
+
+/* Re-use badge styles mostly, but smaller */
+.toc-badge.locked {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+.toc-badge.completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.toc-badge.open {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--gold);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.menu-content-wrapper {
+  flex: 1;
+  min-width: 0; /* Prevent flex overflow */
+  max-width: 100%;
+}
+
 .menu-header {
   text-align: center;
   margin-bottom: 3rem;

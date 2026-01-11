@@ -196,6 +196,9 @@ function renderMenu() {
     });
   }
 
+  const tocList = document.getElementById('toc-list');
+  if (tocList) tocList.innerHTML = '';
+
   for (let i = 0; i < LESSONS.length; i += STAGE_SIZE) {
     const stageLessons = LESSONS.slice(i, i + STAGE_SIZE);
     const stageIndex = i / STAGE_SIZE;
@@ -209,8 +212,43 @@ function renderMenu() {
         }
     }
     
+    const stageName = stageNames[stageIndex] || `Stage ${stageIndex + 1}`;
+    // User requested removing "Stage" from the TOC name
+    const tocName = stageName.replace('Stage ', '');
+    
+    // TOC Item
+    if (tocList) {
+        const li = document.createElement('li');
+        li.className = 'toc-item';
+        
+        const link = document.createElement('a');
+        link.href = `#stage-${stageIndex}`;
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'toc-title';
+        titleSpan.textContent = tocName;
+        link.appendChild(titleSpan);
+        
+        const badgeSpan = document.createElement('span');
+        if (isStageLocked) {
+           badgeSpan.className = 'toc-badge locked';
+           badgeSpan.innerHTML = '🔒';
+        } else if (stageStats[stageIndex].completed) {
+           const avg = stageStats[stageIndex].avgStars.toFixed(1);
+           badgeSpan.className = 'toc-badge completed';
+           badgeSpan.innerHTML = `✅ Ø ${avg} ⭐`;
+        } else {
+           badgeSpan.className = 'toc-badge open';
+           badgeSpan.innerHTML = '🔓';
+        }
+        link.appendChild(badgeSpan);
+        li.appendChild(link);
+        tocList.appendChild(li);
+    }
+    
     // Create Stage Container
     const stageContainer = document.createElement('div');
+    stageContainer.id = `stage-${stageIndex}`; // Add ID for scrolling
     stageContainer.className = `stage-container ${isStageLocked ? 'locked-stage' : ''}`;
     
     const headerDiv = document.createElement('div');

@@ -13,39 +13,47 @@
 <body>
   <!-- Menu View -->
   <div id="menu-view" class="view active">
-    <header class="menu-header">
-      <div class="header-inner">
-        <img src="resources/cute_robot.png" alt="Robot Mascot" class="robot-mascot">
-        
-        <div class="header-content">
-          <h1>🎹 Flinke Finger</h1>
-          <p>Dein deutscher Tipp-Trainer</p>
+    <!-- TOC Sidebar -->
+    <nav id="stage-toc">
+      <h3>Inhalt</h3>
+      <ul id="toc-list"></ul>
+    </nav>
+
+    <div class="menu-content-wrapper">
+      <header class="menu-header">
+        <div class="header-inner">
+          <img src="resources/cute_robot.png" alt="Robot Mascot" class="robot-mascot">
           
-          <div class="player-info">
-            <span id="player-level">Level 1</span>
-            <span id="player-title">Anfänger</span>
-            <span id="star-count">⭐ 0 / 204</span>
-          </div>
-          
-          <div class="progress-bar">
-            <div id="progress-fill"></div>
+          <div class="header-content">
+            <h1>🎹 Flinke Finger</h1>
+            <p>Dein deutscher Tipp-Trainer</p>
+            
+            <div class="player-info">
+              <span id="player-level">Level 1</span>
+              <span id="player-title">Anfänger</span>
+              <span id="star-count">⭐ 0 / 204</span>
+            </div>
+            
+            <div class="progress-bar">
+              <div id="progress-fill"></div>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <div class="keyboard-preview-section">
-      <h2>Meine Tasten</h2>
-      <div id="keyboard-container"></div>
+      <div class="keyboard-preview-section">
+        <h2>Meine Tasten</h2>
+        <div id="keyboard-container"></div>
+      </div>
+      
+      <div id="lessons-grid">
+        <!-- Lessons will be rendered here by JavaScript -->
+      </div>
+      
+      <footer class="menu-footer">
+        <button id="reset-btn">🗑️ Fortschritt zurücksetzen</button>
+      </footer>
     </div>
-    
-    <div id="lessons-grid">
-      <!-- Lessons will be rendered here by JavaScript -->
-    </div>
-    
-    <footer class="menu-footer">
-      <button id="reset-btn">🗑️ Fortschritt zurücksetzen</button>
-    </footer>
   </div>
   
   <script src="data.js"></script>
