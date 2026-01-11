@@ -295,6 +295,22 @@ function renderMenu() {
     stageContainer.appendChild(stageGrid);
     grid.appendChild(stageContainer);
   }
+
+  // Render unlocked keys on main menu
+  let maxUnlockedId = 1;
+  for (let i = 1; i < LESSONS.length; i++) {
+    const lesson = LESSONS[i];
+    const prevStars = progress[lesson.id - 1] || 0;
+    if (prevStars >= 3) {
+      maxUnlockedId = lesson.id;
+    } else {
+      break;
+    }
+  }
+
+  if (document.getElementById('keyboard-container')) {
+    renderKeyboard(maxUnlockedId);
+  }
 }
 
 // Helper for rendering stars (full, half, empty)
