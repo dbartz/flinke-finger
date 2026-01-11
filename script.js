@@ -127,9 +127,6 @@ let charStatus = []; // 'correct' or 'incorrect'
 let totalLessonErrors = 0;
 let totalLessonChars = 0;
 let lessonStartTime = null;
-let totalPausedTime = 0;
-let isPaused = false;
-let pauseStartTime = null;
 let streak = 0;
 let previousLevel = 1;
 
@@ -352,7 +349,6 @@ function initGame() {
   totalLessonErrors = 0;
   totalLessonChars = 0;
   lessonStartTime = Date.now();
-  totalPausedTime = 0;
 
   startNewText();
   renderKeyboard(currentLesson.id);
@@ -366,11 +362,6 @@ function initGame() {
     window.location.href = 'index.html';
   });
   
-  document.getElementById('pause-btn').addEventListener('click', togglePause);
-  document.getElementById('pause-overlay').addEventListener('click', () => {
-    if (isPaused) togglePause();
-  });
-
   // Result buttons
   document.getElementById('retry-btn').addEventListener('click', () => {
     window.location.reload();
@@ -405,8 +396,6 @@ function startNewText() {
   charStatus = new Array(currentText.length).fill(null);
   // errors = 0; // Removed: collecting global errors now
   // startTime = Date.now(); // Removed: using lessonStartTime
-  isPaused = false;
-  streak = 0;
   
   // Accumulate total chars (texts can vary in length)
   totalLessonChars += currentText.length;
@@ -441,7 +430,10 @@ function renderText() {
 }
 
 function handleKeyPress(e) {
-  if (isPaused) return;
+  if (e.key === 'Escape') {
+    window.location.href = 'index.html';
+    return;
+  }
   
   // Ignore modifiers except for visual feedback on keyboard?
   // We can show visual press for any key.
@@ -511,7 +503,7 @@ function handleTextComplete() {
 
 function finishLesson() {
   const endTime = Date.now();
-  const timeSpentMinutes = (endTime - lessonStartTime - totalPausedTime) / 1000 / 60;
+  const timeSpentMinutes = (endTime - lessonStartTime) / 1000 / 60;
   
   // Calculate based on cumulative stats
   const accuracy = Math.max(0, Math.round(((totalLessonChars - totalLessonErrors) / totalLessonChars) * 100));
@@ -613,23 +605,6 @@ function showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStar
   // Focus next button for keyboard navigation
   const nextBtn = document.getElementById('next-btn');
   if (nextBtn) nextBtn.focus();
-}
-
-function togglePause() {
-  isPaused = !isPaused;
-  const pauseBtn = document.getElementById('pause-btn');
-  const overlay = document.getElementById('pause-overlay');
-  
-  if (isPaused) {
-    pauseStartTime = Date.now();
-    pauseBtn.textContent = '▶ Weiter';
-    overlay.classList.remove('hidden');
-  } else {
-    totalPausedTime += Date.now() - pauseStartTime;
-    pauseBtn.textContent = '⏸ Pause';
-    overlay.classList.add('hidden');
-    document.getElementById('game-view').focus();
-  }
 }
 
 // ============== Initialization ==============
