@@ -355,6 +355,7 @@ function initGame() {
   totalPausedTime = 0;
 
   startNewText();
+  renderKeyboard(currentLesson.id);
   
   // Focus game
   document.getElementById('game-view').focus();
@@ -442,7 +443,10 @@ function renderText() {
 function handleKeyPress(e) {
   if (isPaused) return;
   
-  // Ignore modifiers
+  // Ignore modifiers except for visual feedback on keyboard?
+  // We can show visual press for any key.
+  highlightKey(e.key);
+
   if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
   
   // Resume audio context
@@ -638,3 +642,135 @@ document.addEventListener('DOMContentLoaded', () => {
     initGame();
   }
 });
+
+// ============== Keyboard Logic ==============
+const KEYBOARD_LAYOUT = [
+  ['^', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'ß', '´'],
+  ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '+'],
+  ['Caps', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', '#', 'Enter'],
+  ['Shift', '<', 'Y', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '-', 'Shift'],
+  ['Space']
+];
+
+const KEY_UNLOCKS = {
+  1: ['f', 'j'],
+  2: ['d', 'k'],
+  3: ['s', 'l'],
+  4: ['a', 'ö'],
+  6: ['g', 'h'],
+  7: ['e', 'i'],
+  11: ['r', 'u'],
+  12: ['t', 'z'],
+  16: ['w', 'o'],
+  17: ['q', 'p'],
+  21: ['v', 'b'],
+  22: ['n', 'm'],
+  26: ['c'],
+  27: ['x'],
+  28: ['y'],
+  31: ['shift', 'caps'], 
+  36: ['ä'],
+  38: ['ü'],
+  39: ['ß'],
+  41: ['.', ','],
+  43: ['1', '2', '3', '4', '5'],
+  44: ['6', '7', '8', '9', '0']
+};
+
+function getKnownKeys(currentLessonId) {
+  const known = new Set();
+  
+  // Base structural keys
+  ['space', 'enter', 'tab'].forEach(k => known.add(k));
+
+  for (const [lvl, keys] of Object.entries(KEY_UNLOCKS)) {
+    if (currentLessonId >= parseInt(lvl)) {
+      keys.forEach(k => known.add(k.toLowerCase()));
+    }
+  }
+  return known;
+}
+
+function renderKeyboard(lessonId) {
+  const container = document.getElementById('keyboard-container');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const knownKeys = getKnownKeys(lessonId);
+  
+  KEYBOARD_LAYOUT.forEach(row => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'kb-row';
+    
+    row.forEach(keyChar => {
+      const keyDiv = document.createElement('div');
+      keyDiv.className = 'key';
+      
+      const normalizedKey = keyChar.toLowerCase();
+      let displayName = keyChar;
+      if (keyChar === 'Space') displayName = '␣';
+      
+      // Check if known
+      let isKnown = knownKeys.has(normalizedKey);
+      
+      // Auto-unlock specific structural symbols if not explicitly tracked
+      if (['tab', 'caps', 'shift', 'enter', 'space', 'ctrl', 'opt', 'cmd'].includes(normalizedKey)) {
+           // Shift/Caps only known if unlocked via lesson 31? 
+           // Wait, "Space" is needed from start. "Enter" is needed?
+           // Actually, let's just show Space/Enter always.
+           if (['space', 'enter'].includes(normalizedKey)) isKnown = true;
+           // Shift/Caps only if level >= 31
+           if (['shift', 'caps'].includes(normalizedKey) && lessonId >= 31) isKnown = true;
+           
+           // If it's Lesson 1, Shift shouldn't be visible yet? 
+           // If user presses Shift inadvertently, it works, but visually maybe hidden?
+           // The prompt said "only showing the letters of the keys already introduced".
+           // So I should hide Shift until Stage 7.
+      }
+       
+      // Override for modifiers if strict mode
+      if (['tab', 'ctrl', 'opt', 'cmd', '#', '+', '<', '´', '^'].includes(normalizedKey)) {
+         // Hide these for now unless explicit?
+         // They are not in unlock map, so they remain hidden/dimmed.
+         // Effectively "unknown".
+      }
+
+      if (isKnown) {
+        keyDiv.textContent = displayName;
+        keyDiv.classList.add('known');
+        keyDiv.dataset.key = normalizedKey;
+      } else {
+        keyDiv.classList.add('unknown');
+        // keyDiv.textContent = ''; // Keep content for debug or just hide via CSS color: transparent
+        keyDiv.textContent = displayName; // CSS handles transparency
+      }
+      
+      // Special styling classes
+      if (keyChar.length > 1) keyDiv.classList.add('wide');
+      if (keyChar === 'Space') keyDiv.classList.add('space-key');
+      
+      rowDiv.appendChild(keyDiv);
+    });
+    
+    container.appendChild(rowDiv);
+  });
+}
+
+function highlightKey(key) {
+    let normalized = key.toLowerCase();
+    if (key === ' ') normalized = 'space';
+    // Handle special cases
+    if (key === 'Control') normalized = 'ctrl'; // Not in layout
+    if (key === 'Shift') normalized = 'shift';
+    if (key === 'Enter') normalized = 'enter';
+    if (key === 'Backspace') normalized = 'backspace'; // Not in layout
+    
+    // Find key element by text content or dataset
+    const keys = document.querySelectorAll('.key');
+    keys.forEach(k => {
+        if (k.dataset.key === normalized) {
+            k.classList.add('active');
+            setTimeout(() => k.classList.remove('active'), 150);
+        }
+    });
+}

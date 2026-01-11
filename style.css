@@ -877,3 +877,76 @@ body::after {
     justify-content: center;
   }
 }
+
+/* ============== Virtual Keyboard ============== */
+#keyboard-container {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+  perspective: 1000px;
+}
+
+.kb-row {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.key {
+  width: 45px;
+  height: 45px;
+  background: rgba(30, 41, 59, 1);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fira Code', monospace;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 0 rgba(15, 23, 42, 0.8);
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.key.wide {
+  width: 70px;
+  font-size: 0.8rem;
+}
+
+.key.space-key {
+  width: 300px;
+}
+
+/* Unknown keys - hidden/dimmed */
+.key:not(.known) {
+  color: transparent;
+  background: rgba(15, 23, 42, 0.5);
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* Known keys */
+.key.known {
+  background: linear-gradient(to bottom, #334155, #1e293b);
+}
+
+/* Active/Pressed state */
+.key.active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 transparent;
+  background: var(--primary);
+  border-color: var(--primary-light);
+  color: #fff;
+}
+
+/* Highlight expected key (optional, can be added if we want to guide user) */
+.key.highlight {
+  border-color: var(--secondary);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.4), 0 4px 0 rgba(15, 23, 42, 0.8);
+}
