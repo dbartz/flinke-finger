@@ -309,6 +309,7 @@ function renderMenu() {
       let html = `
         <div class="lesson-number">${lesson.id}</div>
         <div class="lesson-name">${lesson.name}</div>
+        <div class="lesson-description">${lesson.description}</div>
         <div class="lesson-stars">
       `;
       
