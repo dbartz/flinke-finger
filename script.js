@@ -425,6 +425,10 @@ function renderText() {
   const container = document.getElementById('text-display');
   container.innerHTML = '';
   
+  // Render active line
+  const activeLine = document.createElement('div');
+  activeLine.className = 'line active-line';
+  
   for (let i = 0; i < currentText.length; i++) {
     const span = document.createElement('span');
     span.textContent = currentText[i] === ' ' ? '␣' : currentText[i];
@@ -441,7 +445,19 @@ function renderText() {
       span.className = 'pending';
     }
     
-    container.appendChild(span);
+    activeLine.appendChild(span);
+  }
+  container.appendChild(activeLine);
+
+  // Render up to 2 previews
+  for (let i = 1; i <= 2; i++) {
+    const nextIdx = currentTextIndex + i;
+    if (nextIdx < currentLesson.texts.length) {
+      const nextLine = document.createElement('div');
+      nextLine.className = 'line next-line';
+      nextLine.textContent = currentLesson.texts[nextIdx];
+      container.appendChild(nextLine);
+    }
   }
 }
 
