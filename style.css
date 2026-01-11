@@ -242,19 +242,61 @@ body::after {
   flex-direction: column;
   gap: 1.5rem;
   animation: fadeIn 0.5s ease-out;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.stage-container.locked-stage {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.stage-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-left: 0.5rem;
 }
 
 .stage-header {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text);
-  margin-left: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
+  margin: 0;
+  padding: 0;
+  border: none;
   background: linear-gradient(90deg, var(--text) 0%, rgba(255,255,255,0.3) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+}
+
+.stage-locked-badge {
+    background: var(--surface);
+    color: var(--text-secondary);
+    padding: 0.3rem 0.8rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
+
+.stage-stats-badge {
+    background: rgba(16, 185, 129, 0.1); /* Success green tint */
+    color: #34d399;
+    padding: 0.3rem 0.8rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
 }
 
 .stage-grid {

@@ -180,18 +180,65 @@ function renderMenu() {
     "Stage 10: Meisterschaft"
   ];
   
+  // Calculate statistics per stage
+  const stageStats = [];
+  for (let i = 0; i < LESSONS.length; i += STAGE_SIZE) {
+    const stageLessons = LESSONS.slice(i, i + STAGE_SIZE);
+    let allLessonsCompleted = true;
+    let totalStarsInStage = 0;
+    
+    stageLessons.forEach(l => {
+        const s = progress[l.id] || 0;
+        if (s < 3) allLessonsCompleted = false; // "Completed" means enough stars to unlock next
+        totalStarsInStage += s;
+    });
+    
+    stageStats.push({
+        completed: allLessonsCompleted,
+        avgStars: totalStarsInStage / STAGE_SIZE
+    });
+  }
+
   for (let i = 0; i < LESSONS.length; i += STAGE_SIZE) {
     const stageLessons = LESSONS.slice(i, i + STAGE_SIZE);
     const stageIndex = i / STAGE_SIZE;
     
+    // Check locked status: Locked if previous stage not completed
+    // Stage 0 (first) is never locked by a previous stage
+    let isStageLocked = false;
+    if (stageIndex > 0) {
+        if (!stageStats[stageIndex - 1].completed) {
+            isStageLocked = true;
+        }
+    }
+    
     // Create Stage Container
     const stageContainer = document.createElement('div');
-    stageContainer.className = 'stage-container';
+    stageContainer.className = `stage-container ${isStageLocked ? 'locked-stage' : ''}`;
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'stage-header-wrapper';
     
     const stageHeader = document.createElement('h2');
     stageHeader.className = 'stage-header';
     stageHeader.textContent = stageNames[stageIndex] || `Stage ${stageIndex + 1}`;
-    stageContainer.appendChild(stageHeader);
+    headerDiv.appendChild(stageHeader);
+
+    // Show stats if completed, or lock icon if locked
+    if (isStageLocked) {
+        const lockedBadge = document.createElement('span');
+        lockedBadge.className = 'stage-locked-badge';
+        lockedBadge.innerHTML = '🔒 Gesperrt';
+        headerDiv.appendChild(lockedBadge);
+    } else if (stageStats[stageIndex].completed) {
+        const avg = stageStats[stageIndex].avgStars.toFixed(1);
+        const statsBadge = document.createElement('span');
+        statsBadge.className = 'stage-stats-badge';
+        statsBadge.innerHTML = `✅ Abgeschlossen (Ø ${avg} ⭐)`;
+        headerDiv.appendChild(statsBadge);
+    }
+    
+    stageContainer.appendChild(headerDiv);
     
     const stageGrid = document.createElement('div');
     stageGrid.className = 'stage-grid';
@@ -200,17 +247,23 @@ function renderMenu() {
       const card = document.createElement('div');
       const stars = progress[lesson.id] || 0;
       
-      // Determine lock status
-      let isLocked = false;
+      // Keep individual lesson lock logic for fine-grained progression inside a stage
+      // If the stage is locked, all lessons are visually locked by the container style,
+      // but let's keep the logic consistent.
+      
+      let isLessonLocked = false;
       if (lesson.id > 1) {
         const prevLessonId = lesson.id - 1;
         const prevStars = progress[prevLessonId] || 0;
         if (prevStars < 3) {
-          isLocked = true;
+          isLessonLocked = true;
         }
       }
       
-      card.className = `lesson-card ${isLocked ? 'locked' : 'unlocked'}`;
+      // Force lock if stage is locked
+      if (isStageLocked) isLessonLocked = true;
+
+      card.className = `lesson-card ${isLessonLocked ? 'locked' : 'unlocked'}`;
       
       let html = `
         <div class="lesson-number">${lesson.id}</div>
@@ -218,7 +271,7 @@ function renderMenu() {
         <div class="lesson-stars">
       `;
       
-      if (isLocked) {
+      if (isLessonLocked) {
         html += '<span class="lock-icon">🔒</span>';
       } else {
         html += generateStarsHTML(stars);
@@ -227,7 +280,7 @@ function renderMenu() {
       html += `</div>`;
       card.innerHTML = html;
       
-      if (!isLocked) {
+      if (!isLessonLocked) {
         card.addEventListener('click', () => {
           window.location.href = `lesson.html?id=${lesson.id}`;
         });
