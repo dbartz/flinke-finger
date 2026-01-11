@@ -236,6 +236,12 @@ function renderMenu() {
         statsBadge.className = 'stage-stats-badge';
         statsBadge.innerHTML = `✅ Abgeschlossen (Ø ${avg} ⭐)`;
         headerDiv.appendChild(statsBadge);
+    } else {
+        // Current open stage
+        const openBadge = document.createElement('span');
+        openBadge.className = 'stage-open-badge';
+        openBadge.innerHTML = '🔓 Freigeschaltet';
+        headerDiv.appendChild(openBadge);
     }
     
     stageContainer.appendChild(headerDiv);
