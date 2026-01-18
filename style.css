@@ -43,14 +43,27 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: radial-gradient(circle at top left, var(--background-end), var(--background-start));
-  background-attachment: fixed;
+  /* Moved background to html::before to prevent flickering on scroll */
+  background: transparent;
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
+}
+
+/* Fixed background layer for better performance */
+html::before {
+  content: '';
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, var(--background-end), var(--background-start));
+  z-index: -50; /* Behind everything */
+  pointer-events: none;
 }
 
 /* Background elements */
@@ -88,6 +101,8 @@ body::after {
   max-width: 100%; /* Was 1200px, let specific view handle width */
   margin: 0 auto;
   animation: fadeIn 0.4s ease-out;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .view.active {
@@ -264,6 +279,7 @@ body::after {
   filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
   animation: float 4s ease-in-out infinite;
   object-fit: contain;
+  will-change: transform;
 }
 
 @keyframes float {
