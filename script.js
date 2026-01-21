@@ -165,6 +165,17 @@ let previousLevel = 1;
 function initMenu() {
   renderMenu();
   
+  // Navigate to specific lesson if hash is present
+  if (window.location.hash) {
+    const id = window.location.hash.substring(1);
+    const element = document.getElementById(id);
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+  
   document.getElementById('reset-btn').addEventListener('click', () => {
     if (confirm('Wirklich allen Fortschritt löschen? Das kann nicht rückgängig gemacht werden!')) {
       resetProgress();
@@ -335,6 +346,8 @@ function renderMenu() {
       // Force lock if stage is locked
       if (isStageLocked) isLessonLocked = true;
 
+      // Assign an ID so we can anchor-link back to this lesson
+      card.id = `lesson-${lesson.id}`;
       card.className = `lesson-card ${isLessonLocked ? 'locked' : 'unlocked'}`;
       
       let html = `
@@ -478,7 +491,7 @@ function initGame() {
     const menuBtn = document.getElementById('start-menu-btn');
     if (menuBtn) {
         menuBtn.onclick = () => {
-            window.location.href = 'index.html';
+            window.location.href = `index.html#lesson-${currentLesson.id}`;
         };
     }
     
@@ -508,7 +521,7 @@ function initGame() {
   
   // Controls
   document.getElementById('back-btn').addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = `index.html#lesson-${currentLesson.id}`;
   });
   
   // Result buttons
@@ -526,7 +539,7 @@ function initGame() {
   });
   
   document.getElementById('menu-btn').addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = `index.html#lesson-${currentLesson.id}`;
   });
 
   // Allow using Enter key to proceed from result screen
