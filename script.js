@@ -403,14 +403,47 @@ function initGame() {
   // Initialize session stats
   totalLessonErrors = 0;
   totalLessonChars = 0;
-  lessonStartTime = Date.now();
 
-  startNewText();
-  renderKeyboard(currentLesson.id);
-  
-  // Focus game
-  document.getElementById('game-view').focus();
-  document.getElementById('game-view').addEventListener('keydown', handleKeyPress);
+  // Show Start Overlay instead of starting immediately
+  const startOverlay = document.getElementById('start-overlay');
+  if (startOverlay) {
+    document.getElementById('start-lesson-title').textContent = currentLesson.name;
+    document.getElementById('start-lesson-desc').textContent = currentLesson.description;
+    
+    startOverlay.classList.remove('hidden');
+    
+    // Focus start button for accessibility
+    const startBtn = document.getElementById('start-game-btn');
+    startBtn.focus();
+    
+    startBtn.onclick = () => {
+      startOverlay.classList.add('hidden');
+      startGameflow();
+    };
+    
+    // Allow Enter key to start logic is handled by button focus usually, 
+    // but just in case focus is lost or not set:
+    startOverlay.onkeydown = (e) => {
+        if(e.key === 'Enter') {
+            startBtn.click();
+        }
+    }
+    
+  } else {
+    // Fallback if overlay doesn't exist
+    startGameflow();
+  }
+
+  function startGameflow() {
+    lessonStartTime = Date.now();
+    startNewText();
+    renderKeyboard(currentLesson.id);
+    
+    // Focus game
+    const gameView = document.getElementById('game-view');
+    gameView.focus();
+    gameView.addEventListener('keydown', handleKeyPress);
+  }
   
   // Controls
   document.getElementById('back-btn').addEventListener('click', () => {

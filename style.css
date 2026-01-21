@@ -785,7 +785,7 @@ body::after {
 }
 
 /* ============== Pause & Result Overlays ============== */
-#pause-overlay, #result-overlay {
+#pause-overlay, #result-overlay, #start-overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.6);
@@ -797,7 +797,7 @@ body::after {
   animation: fadeIn 0.3s ease-out;
 }
 
-.pause-content, .result-content {
+.pause-content, .result-content, .start-content {
   background: #1e293b;
   padding: 3rem;
   border-radius: 2rem;
@@ -816,13 +816,19 @@ body::after {
 }
 
 /* Result specific */
-.result-content h2 {
+.result-content h2, .start-content h2 {
   font-size: 2.5rem;
   margin-bottom: 2rem;
   background: linear-gradient(135deg, #fff, var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.start-content p {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
 }
 
 #result-stars {
