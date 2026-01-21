@@ -1016,6 +1016,9 @@ function renderKeyboard(lessonId) {
       // Special styling classes
       if (keyChar.length > 1) keyDiv.classList.add('wide');
       if (keyChar === 'Space') keyDiv.classList.add('space-key');
+      if (['Tab', 'Caps', 'Shift', 'Enter'].includes(keyChar)) {
+          keyDiv.classList.add(keyChar.toLowerCase() + '-key');
+      }
       
       rowDiv.appendChild(keyDiv);
     });
