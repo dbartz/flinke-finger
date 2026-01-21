@@ -68,8 +68,35 @@
     <div class="start-content">
       <h2 id="start-lesson-title">Lektion Name</h2>
       <p id="start-lesson-desc">Beschreibung</p>
+      
+      <div class="start-stats-container">
+        <div class="stat-row">
+            <span class="stat-label">Zielgeschwindigkeit:</span>
+            <span class="stat-value" id="start-target-wpm">0 WPM</span>
+        </div>
+        
+        <div class="best-run-container">
+            <h3 class="best-header">Dein Rekord</h3>
+            <div class="best-stats-grid">
+               <div class="best-stat-row">
+                 <span class="stat-key">Genauigkeit:</span>
+                 <span class="stat-val"><span id="start-best-acc-val">-</span> <span id="start-best-acc-stars" class="mini-stars"></span></span>
+               </div>
+               <div class="best-stat-row">
+                 <span class="stat-key">Geschwindigkeit:</span>
+                 <span class="stat-val"><span id="start-best-wpm-val">-</span> <span id="start-best-wpm-stars" class="mini-stars"></span></span>
+               </div>
+               <div class="best-stat-row total-row">
+                 <span class="stat-key">Gesamt:</span>
+                 <span class="stat-val" id="start-best-total-stars"></span>
+               </div>
+            </div>
+        </div>
+      </div>
+
       <div class="result-buttons">
         <button id="start-game-btn"><span class="btn-icon">▶️</span> Starten</button>
+        <button id="start-menu-btn"><span class="btn-icon">🏠</span> Menü</button>
       </div>
     </div>
   </div>

@@ -2,10 +2,41 @@
 
 // ============== State Management ==============
 const STATE_KEY = 'flinke-finger-progress';
+const BEST_RUNS_KEY = 'flinke-finger-best-runs';
 
 function loadProgress() {
   const saved = localStorage.getItem(STATE_KEY);
   return saved ? JSON.parse(saved) : {};
+}
+
+function loadBestRuns() {
+    const saved = localStorage.getItem(BEST_RUNS_KEY);
+    return saved ? JSON.parse(saved) : {};
+}
+
+function saveBestRun(lessonId, runData) {
+    const bestRuns = loadBestRuns();
+    // Logic: Is this new run better?
+    // Criteria: More stars, or same stars and higher wpm
+    const currentBest = bestRuns[lessonId];
+    
+    let isBetter = false;
+    if (!currentBest) {
+        isBetter = true;
+    } else {
+        if (runData.stars > currentBest.stars) {
+            isBetter = true;
+        } else if (runData.stars === currentBest.stars) {
+            if (runData.wpm > currentBest.wpm) {
+                isBetter = true;
+            }
+        }
+    }
+    
+    if (isBetter) {
+        bestRuns[lessonId] = runData;
+        localStorage.setItem(BEST_RUNS_KEY, JSON.stringify(bestRuns));
+    }
 }
 
 function saveProgress(lessonId, stars) {
@@ -410,6 +441,29 @@ function initGame() {
     document.getElementById('start-lesson-title').textContent = currentLesson.name;
     document.getElementById('start-lesson-desc').textContent = currentLesson.description;
     
+    // Show stats on start screen
+    const targetWPM = currentLesson.targetSpeed || 50;
+    document.getElementById('start-target-wpm').textContent = `${targetWPM} WPM`;
+    
+    const bestRuns = loadBestRuns();
+    const best = bestRuns[currentLesson.id];
+    if (best) {
+        document.getElementById('start-best-wpm-val').textContent = `${best.wpm} WPM`;
+        document.getElementById('start-best-acc-val').textContent = `${best.accuracy}%`;
+        
+        // Recalculate stars breakdown for display
+        const speedPercent = Math.round((best.wpm / targetWPM) * 100);
+        const accuracyStars = getAccuracyStars(best.accuracy);
+        const speedStars = getSpeedStars(speedPercent);
+        
+        document.getElementById('start-best-acc-stars').innerHTML = getStarsString(accuracyStars);
+        document.getElementById('start-best-wpm-stars').innerHTML = getStarsString(speedStars);
+        document.getElementById('start-best-total-stars').innerHTML = generateStarsHTML(best.stars);
+    } else {
+        ['start-best-wpm-val', 'start-best-acc-val'].forEach(id => document.getElementById(id).textContent = '-');
+        ['start-best-acc-stars', 'start-best-wpm-stars', 'start-best-total-stars'].forEach(id => document.getElementById(id).innerHTML = '');
+    }
+
     startOverlay.classList.remove('hidden');
     
     // Focus start button for accessibility
@@ -420,6 +474,13 @@ function initGame() {
       startOverlay.classList.add('hidden');
       startGameflow();
     };
+
+    const menuBtn = document.getElementById('start-menu-btn');
+    if (menuBtn) {
+        menuBtn.onclick = () => {
+            window.location.href = 'index.html';
+        };
+    }
     
     // Allow Enter key to start logic is handled by button focus usually, 
     // but just in case focus is lost or not set:
@@ -695,6 +756,29 @@ function handleTextComplete() {
   }
 }
 
+// ============== Stats Helpers ==============
+function getAccuracyStars(percent) {
+  if (percent >= 100) return 5;
+  if (percent >= 90) return 4;
+  if (percent >= 80) return 3;
+  if (percent >= 70) return 2;
+  if (percent >= 50) return 1;
+  return 0;
+}
+
+function getSpeedStars(percent) {
+  if (percent >= 100) return 5;
+  if (percent >= 80) return 4;
+  if (percent >= 60) return 3;
+  if (percent >= 40) return 2;
+  if (percent >= 15) return 1;
+  return 0;
+}
+
+function getStarsString(count) {
+  return '★'.repeat(count) + '☆'.repeat(5 - count);
+}
+
 function finishLesson() {
   const endTime = Date.now();
   const timeSpentMinutes = (endTime - lessonStartTime) / 1000 / 60;
@@ -704,33 +788,17 @@ function finishLesson() {
   
   // WPM
   const words = totalLessonChars / 5;
+  const targetWPM = currentLesson.targetSpeed || 50;
+  
   const wpm = Math.round(words / Math.max(timeSpentMinutes, 0.001)); 
   
   // Star Calculation
   // 1 to 5 stars per lesson based on accuracy/speed average.
   // Accuracy Stars: 50 -> 1, 70 -> 2, 80 -> 3, 90 -> 4, 100 -> 5
-  // Speed Stars (50wpm=100%): 50% -> 1, 70% -> 2, 80% -> 3, 90% -> 4, 100% -> 5
+  // Speed Stars (targetWPM=100%): 50% -> 1, 70% -> 2, 80% -> 3, 90% -> 4, 100% -> 5
   // Total: Average of Accuracy and Speed stars
   
-  const speedPercent = Math.round((wpm / 50) * 100);
-  
-  function getAccuracyStars(percent) {
-    if (percent >= 100) return 5;
-    if (percent >= 90) return 4;
-    if (percent >= 80) return 3;
-    if (percent >= 70) return 2;
-    if (percent >= 50) return 1;
-    return 0;
-  }
-  
-  function getSpeedStars(percent) {
-    if (percent >= 100) return 5;
-    if (percent >= 80) return 4;
-    if (percent >= 60) return 3;
-    if (percent >= 40) return 2;
-    if (percent >= 15) return 1;
-    return 0;
-  }
+  const speedPercent = Math.round((wpm / targetWPM) * 100);
   
   const accuracyStars = getAccuracyStars(accuracy);
   const speedStars = getSpeedStars(speedPercent);
@@ -741,6 +809,15 @@ function finishLesson() {
   }
   
   saveProgress(currentLesson.id, stars);
+  
+  // Save detailed stats
+  saveBestRun(currentLesson.id, {
+      wpm: wpm,
+      accuracy: accuracy,
+      stars: stars,
+      date: new Date().toISOString()
+  });
+
   playWin();
   
   showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStars);
@@ -757,10 +834,6 @@ function showResult(stars, accuracy, wpm, speedPercent, accuracyStars, speedStar
   starsContainer.innerHTML = generateStarsHTML(stars);
   
   // Stats
-  function getStarsString(count) { // Helper to stringify stars
-     return '★'.repeat(count) + '☆'.repeat(5 - count);
-  }
-
   document.getElementById('result-accuracy').innerHTML = ` Genauigkeit: ${accuracy}% <span class="mini-stars">${getStarsString(accuracyStars)}</span>`;
   document.getElementById('result-wpm').innerHTML = `Geschwindigkeit: ${wpm} WPM (${speedPercent}%) <span class="mini-stars">${getStarsString(speedStars)}</span>`;
   

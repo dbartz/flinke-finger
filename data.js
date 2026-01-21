@@ -539,3 +539,12 @@ const TITLES = {
   95: "Fast-Legende",
   100: "Tipp-Legende"
 };
+
+// Assign target speeds based on stages (5 lessons per stage)
+const TARGET_SPEEDS = [25, 28, 31, 33, 36, 39, 42, 44, 47, 50];
+LESSONS.forEach(lesson => {
+    // Stage logic matches script.js: 1-5=Stage 0, 6-10=Stage 1, etc.
+    const stageIndex = Math.floor((lesson.id - 1) / 5);
+    const target = TARGET_SPEEDS[Math.min(stageIndex, TARGET_SPEEDS.length - 1)];
+    lesson.targetSpeed = target;
+});
